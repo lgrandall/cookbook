@@ -39,13 +39,13 @@
   <div class="field">
     <div class="ingredients">
       <%= form.fields_for :ingredients, recipe.ingredients.build, dynamic: true do |ff| %>
-        <%= render partial: "ingredient_fields", locals: { f: ff, l: form, recipe: :recipe, build_instruction: true }  %>
+        <%= render partial: "ingredient_fields", locals: { f: ff, l: form, recipe: :recipe, action: params['action'] }  %>
         <%=puts "LOUIS RANDALL THE PARAMS: #{params.inspect}" %>
       <% end %>
     </div>
 
     <%= link_to_remove_association "Delete", form, data: { association_insertion_node: '.ingredients'}%>
-    <%= link_to_add_association "Add Ingredient", form, :ingredients, render_options: {locals: { l: form, build_instruction: true }}, data: { association_insertion_node: '.ingredients', association_insertion_method: :append } %>
+    <%= link_to_add_association "Add Ingredient", form, :ingredients, render_options: {locals: { l: form, action: params['action'] }}, data: { association_insertion_node: '.ingredients', association_insertion_method: :append } %>
   </div>
 
   <div class="field">
