@@ -27,20 +27,22 @@ class RecipesController < ApplicationController
 
     instruction_params = {}
     ingredient_params = {}
+
     updated_params = recipe_params
     puts "louis randall the updated_params first look: #{updated_params.inspect}"
     puts "louis randall the updated_params first look new instructions: #{updated_params["New Instructions"]}"
 
-    if updated_params["Ingredient"].present?
-      updated_params["Ingredient"].each_with_index do |id, index|
-        ingredient_params[id] = [id, updated_params["Quantity"][index].to_d, updated_params["Measurement"][index]]
+    if params["Ingredient"].present?
+      params["Ingredient"].each_with_index do |id, index|
+        puts "LOUIS RANDALL THE INGREDIENT PARAM VAL: #{ingredient_params.inspect}, the updated params: #{updated_params}"
+        ingredient_params[id] = [id, params["Quantity"][index].to_d, params["Measurement"][index]]
       end
     end
 
-    if updated_params["Instruction"].present?
-      order_instructions = updated_params["Order"].map(&:to_i)
-      updated_params["Instruction"].each_with_index do |id, index|
-        puts "louis randall the order params: #{updated_params['Order']}"
+    if params["Instruction"].present?
+      order_instructions = params["Order"].map(&:to_i)
+      params["Instruction"].each_with_index do |id, index|
+        puts "louis randall the order params: #{params['Order']}"
         instruction_params["#{id} - #{index}"] = [id, order_instructions[index]]
       end
     end
@@ -152,7 +154,12 @@ class RecipesController < ApplicationController
 
     ingredient_params.each do |key, value|
       puts "LOUIS RANDALL VALUE: #{value.inspect}"
-      recipe.recipe_ingredients.find_or_create_by(ingredient_id: value[0], quantity_id:value[1], measurement_id: value[2])
+      if value[1].zero? || value[1].nil?
+        recipe.recipe_ingredients.where(ingredient_id: value[0]).first.destroy
+      else
+        recipe.recipe_ingredients.find_or_create_by(ingredient_id: value[0], quantity_id:value[1], measurement_id: value[2])
+      end
+
     end
   end
 
@@ -161,8 +168,14 @@ class RecipesController < ApplicationController
 
     puts "LOUIS RANDALL instruction_params: #{instruction_params}"
     instruction_params.each do |key, value|
-      puts "LOUIS RANDALL THE VALUE "
-      recipe.recipe_instructions.find_or_create_by(instruction_id: value[0], order: value[1])
+      puts "LOUIS RANDALL THE VALUE of it all is: #{value.inspect}"
+      instruction_id = value[0]
+      order = value[1]
+      if value[1].zero? || value[1].nil?
+        recipe.recipe_instructions.where(instruction_id: instruction_id).first.destroy
+      else
+        recipe.recipe_instructions.find_or_create_by(instruction_id: instruction_id, order: order)
+      end
     end
   end
 

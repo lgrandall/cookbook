@@ -51,13 +51,13 @@
   <div class="field">
     <div class="instructions">
       <%= form.fields_for :instructions, recipe.instructions.build, dynamic: true do |ff| %>
-        <%= render partial: "instruction_fields", locals: { f: ff, l: form, recipe: :recipe, build_instruction: false }  %>
+        <%= render partial: "instruction_fields", locals: { f: ff, l: form, recipe: :recipe, action: params['action'], build_instruction: false }  %>
         <%=puts "LOUIS RANDALL THE PARAMS: #{params.inspect}" %>
       <% end %>
     </div>
 
     <%= link_to_remove_association "Delete", form, data: { association_insertion_node: '.instructions'}%>
-    <%= link_to_add_association "Add Instruction", form, :instructions, render_options: {locals: { l: form, build_instruction: false }}, data: { association_insertion_node: '.instructions', association_insertion_method: :append } %>
+    <%= link_to_add_association "Add Instruction", form, :instructions, render_options: {locals: { l: form, action: params['action'], build_instruction: false }}, data: { association_insertion_node: '.instructions', association_insertion_method: :append } %>
   </div>
 
   <div class="field">
@@ -65,7 +65,7 @@
     </div>
 
     <%= link_to_remove_association "Delete", form, data: { association_insertion_node: '.build_instructions'}%>
-    <%= link_to_add_association "Add Instruction from Scratch", form, :instructions, render_options: {locals: { l: form, build_instruction: true }}, data: { association_insertion_node: '.build_instructions', association_insertion_method: :append } %>
+    <%= link_to_add_association "Add Instruction from Scratch", form, :instructions, render_options: {locals: { l: form, action: params['action'], build_instruction: true }}, data: { association_insertion_node: '.build_instructions', association_insertion_method: :append } %>
   </div>
 
 <!--  <div class="field">-->

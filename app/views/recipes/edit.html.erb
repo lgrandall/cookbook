@@ -37,11 +37,19 @@
 
     <div class="field">
       <div class="instructions">
-        <%= render partial: "instruction_fields", locals: { f: form, recipe: @recipe, action: params['action'] }  %>
+        <%= render partial: "instruction_fields", locals: { f: form, recipe: @recipe, action: params['action'], build_instruction: false }  %>
       </div>
 
       <%= link_to_remove_association "Delete", form, data: { association_insertion_node: '.instructions'}%>
-      <%= link_to_add_association "Add Instruction", form, :instructions, render_options: {locals: { f: form, recipe: @recipe, action: params['action'] }}, data: { association_insertion_node: '.ingredients', association_insertion_method: :append } %>
+      <%= link_to_add_association "Add Instruction", form, :instructions, render_options: {locals: { f: form, recipe: @recipe, action: params['action'], build_instruction: false }}, data: { association_insertion_node: '.ingredients', association_insertion_method: :append } %>
+    </div>
+
+    <div class="field">
+      <div class="build_instructions">
+      </div>
+
+      <%= link_to_remove_association "Delete", form, data: { association_insertion_node: '.build_instructions'}%>
+      <%= link_to_add_association "Add Instruction from Scratch", form, :instructions, render_options: {locals: { l: form, action: params['action'], build_instruction: true }}, data: { association_insertion_node: '.build_instructions', association_insertion_method: :append } %>
     </div>
   <% else %>
     <div class="field">
