@@ -27,12 +27,14 @@ class RecipesController < ApplicationController
 
     instruction_params = {}
     ingredient_params = {}
+
     updated_params = recipe_params
     puts "louis randall the updated_params first look: #{updated_params.inspect}"
     puts "louis randall the updated_params first look new instructions: #{updated_params["New Instructions"]}"
 
     if params["Ingredient"].present?
       params["Ingredient"].each_with_index do |id, index|
+        puts "LOUIS RANDALL THE INGREDIENT PARAM VAL: #{ingredient_params.inspect}, the updated params: #{updated_params}"
         ingredient_params[id] = [id, params["Quantity"][index].to_d, params["Measurement"][index]]
       end
     end
@@ -77,7 +79,29 @@ class RecipesController < ApplicationController
 
   # PATCH/PUT /recipes/1 or /recipes/1.json
   def update
+    ingredient_params = {}
+    instruction_params = {}
+
+    if params["Ingredient"].present?
+      params["Ingredient"].each_with_index do |id, index|
+        ingredient_params[id] = [id, params["Quantity"][index].to_d, params["Measurement"][index]]
+      end
+    end
+
+    if params["Instruction"].present?
+      order_instructions = params["Order"].map(&:to_i)
+      params["Instruction"].each_with_index do |id, index|
+        puts "louis randall the order params: #{params['Order']}"
+        instruction_params["#{id} - #{index}"] = [id, order_instructions[index]]
+      end
+    end
+
+    puts "LOUIS RANDALL THE UPDATED INGREDIENT PARAMS: #{ingredient_params}"
+    puts "LOUIS RANDALL THE UPDATED INSTRUCTION PARAMS: #{instruction_params}"
+
     updated_params = recipe_params
+    instructions_attributes = updated_params["New Instructions"]
+
     puts "LOUIS RANDALL THE PARAMS: #{params.inspect}"
 
     updated_params.delete("Instruction")
@@ -85,9 +109,11 @@ class RecipesController < ApplicationController
     updated_params.delete("Quantity")
     updated_params.delete("Measurement")
     updated_params.delete("instructions_attributes")
+    updated_params.delete("New Instructions")
+
 
     respond_to do |format|
-      if @recipe.update(updated_params)
+      if @recipe.update(updated_params) && recipe_ingredient_creation(@recipe, ingredient_params) && recipe_instruction_creation(@recipe,instruction_params ) && create_new_instructions(@recipe, instructions_attributes)
         format.html { redirect_to @recipe, notice: "Recipe was successfully updated." }
         format.json { render :show, status: :ok, location: @recipe }
       else
@@ -124,21 +150,38 @@ class RecipesController < ApplicationController
     end
 
   def recipe_ingredient_creation(recipe, ingredient_params)
+    return true if ingredient_params.nil?
+
     ingredient_params.each do |key, value|
       puts "LOUIS RANDALL VALUE: #{value.inspect}"
-      recipe.recipe_ingredients.find_or_create_by(ingredient_id: value[0], quantity_id:value[1], measurement_id: value[2])
+      if value[1].zero? || value[1].nil?
+        recipe.recipe_ingredients.where(ingredient_id: value[0]).first.destroy
+      else
+        recipe.recipe_ingredients.find_or_create_by(ingredient_id: value[0], quantity_id:value[1], measurement_id: value[2])
+      end
+
     end
   end
 
   def recipe_instruction_creation(recipe, instruction_params)
+    return true if instruction_params.nil?
+
     puts "LOUIS RANDALL instruction_params: #{instruction_params}"
     instruction_params.each do |key, value|
-      puts "LOUIS RANDALL THE VALUE "
-      recipe.recipe_instructions.find_or_create_by(instruction_id: value[0], order: value[1])
+      puts "LOUIS RANDALL THE VALUE of it all is: #{value.inspect}"
+      instruction_id = value[0]
+      order = value[1]
+      if value[1].zero? || value[1].nil?
+        recipe.recipe_instructions.where(instruction_id: instruction_id).first.destroy
+      else
+        recipe.recipe_instructions.find_or_create_by(instruction_id: instruction_id, order: order)
+      end
     end
   end
 
   def create_new_instructions(recipe, instructions_attributes)
+    return true if instructions_attributes.nil?
+
     recipe = recipe
     puts "LOUIS RANDALL TEH create_new_instructions: #{instructions_attributes}"
     instructions_attributes.each do |k, v|
@@ -147,7 +190,7 @@ class RecipesController < ApplicationController
       puts "LOUIS RANDALL TEH V: #{v.inspect}"
       puts "LOUIS RANDALL TEH V: #{v.inspect}"
 
-      instruction = Instruction.new(short_hand_name: attr["short_hand_name"], description: attr["description"], time_amount: attr["time_amount"])
+      instruction = Instruction.find_or_create_by(short_hand_name: attr["short_hand_name"], description: attr["description"], time_amount: attr["time_amount"])
       recipe.recipe_instructions.find_or_create_by(instruction: instruction, order: attr["order"])
     end
   end

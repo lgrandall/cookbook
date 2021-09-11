@@ -24,6 +24,11 @@
         <%= f.number_field :order %>
       </div>
     </div>
+  <% elsif action == "edit" %>
+    <% f.object.recipe_instructions.each do |recipe_instruction| %>
+      <%= select_tag 'Instruction', options_for_select(Instruction.all.collect{ |u| [u.short_hand_name, u.id.to_s]}, recipe_instruction.instruction_id), include_blank: true, multiple: true %>
+      <%= select_tag 'Order', options_for_select(["delete"] + (1..100).to_a, recipe_instruction.order), include_blank: true, multiple: true %>
+    <% end %>
   <% else %>
     <div>
       <%= f.label "Instruction name and order" %>
